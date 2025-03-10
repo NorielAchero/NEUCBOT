@@ -46,7 +46,7 @@
 
     <div class="container">
         <h2>Send Message to Telegram</h2>
-        <input type="text" id="imageUrl" placeholder="Enter Image URL (optional)">
+        <input type="file" id="imageFile" accept="image/*">
         <input type="text" id="caption" placeholder="Enter Text Message (optional)">
         <button onclick="sendMessage()">📤 Send</button>
         <p id="status"></p>
@@ -54,23 +54,27 @@
 
     <script>
         async function sendMessage() {
-            const imageUrl = document.getElementById('imageUrl').value.trim();
+            const imageFile = document.getElementById('imageFile').files[0];
             const caption = document.getElementById('caption').value.trim();
             const statusElement = document.getElementById('status');
 
-            // Ensure at least one input is provided
-            if (!imageUrl && !caption) {
-                statusElement.innerText = "⚠️ Please enter an image URL or a text message.";
+            if (!imageFile && !caption) {
+                statusElement.innerText = "⚠️ Please select an image or enter a message.";
                 return;
             }
 
             statusElement.innerText = "⏳ Sending...";
 
+            const formData = new FormData();
+            if (imageFile) {
+                formData.append("image", imageFile);
+            }
+            formData.append("caption", caption);
+
             try {
                 const response = await fetch("https://orenji207.pythonanywhere.com/send", {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ image_url: imageUrl, caption: caption })
+                    body: formData
                 });
 
                 const result = await response.json();
